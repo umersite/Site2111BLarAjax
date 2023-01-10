@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use DataTables;
-use App\Product;
 use Illuminate\Http\Request;
+use App\Models\Product;
+use DataTables;
+
+
 
 class ProductAjaxController extends Controller
 {
@@ -16,10 +18,10 @@ class ProductAjaxController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-           $data = Product::latest()->get();
-
-           //print_r ($data);
-          return DataTables::of($data);
+           $data = Product::latest()->get();      
+          return DataTables::of($data)
+          ->addIndexColumn()         
+          ->make(true);   
         }
         //return $data;
        return view('productAjax');
@@ -43,7 +45,10 @@ class ProductAjaxController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Product::updateOrCreate(['id'=> $request->product_id],
+        ['name'=>$request->name, 'detail'=>$request->detail]);
+
+        return response()->json(['success'=>'Product saved successfully']);
     }
 
     /**

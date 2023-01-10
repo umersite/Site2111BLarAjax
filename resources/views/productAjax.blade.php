@@ -24,22 +24,110 @@
         <div class="jumbotron">
            
             <p>Product Controller</p>
+            <a href="javascript:void(0)" class="btn btn-success" id="CreateNewProduct">Create Product</a>
         </div>
-        <table class="table table-bordered data-table">
+        <table class="table table-bordered table-responsive data-table">
             <thead>
                 <tr>
                     <th>No</th>
                     <th>Name</th>
                     <th>Details</th>
-                    <th>Action</th>
+                    <!-- <th>Action</th> -->
                 </tr>
             </thead>
             <tbody>
             </tbody>
+
         </table>
     </div>
+    <div id="ajaxModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modelHeader">Heading Goes Here</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm" name="productForm" class="form-horizontal" action="">
+                        <input type="hidden" name="product_id" id="product_id">
+                        <div class="form-group">
+                          <label for="name" class="col-sm-2 control-label">Product Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="name" id="name" required class="form-control" placeholder="Enter Name" aria-describedby="helpId">
+                                <small id="helpId" class="text-muted">Enter Product Name</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="detail" class="col-sm-2 control-label">Product Detail</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="detail" id="detail" class="form-control" required placeholder="Enter Detail" aria-describedby="helpId">
+                                <small id="helpId" class="text-muted">Enter Product Detail</small>
+                            </div>
+                        </div>
+                        <div class="col-sm offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-primary" id="saveBtn" value="Create">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        
+        $(function(){
+            $.ajaxSetup({
+                headers:{
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var table = $('.data-table').DataTable({
+                processing:true,
+                serverSide:true,
+                ajax: "{{ route('products.index') }}",
+                columns:[
+                    {data: 'DT_RowIndex', name:'DT_RowIndex'},
+                    {data:'name',name:'name'},
+                    {data:'detail',name:'detail'}                    
+                ] 
+            });
+            $('#CreateNewProduct').click(function(){
+                // alert("add button clicked");
+                $("#saveBtn").val("Create-Product");
+                $("#product_id").val('');
+                $("#productForm").trigger("reset");
+                $("#modelHeader").html("Create New Product");
+                $('#ajaxModal').modal('show');
+            });
+
+            /// add button code
+            $("#saveBtn").click(function(e){
+                e.preventDefault();
+                $(this).html('Sending......');
+
+                $.ajax({
+                    data:$('#productForm').serialize(),
+                    url: "{{ route('products.store')}}",
+                    type: "POST",
+                    dataType: 'json',
+
+                    success:function(data){
+                        console.log(data.success);
+                        $("#productForm").trigger("reset");
+                        $("#saveBtn").val("Save Changes");
+                        $('#ajaxModal').modal('hide');
+                        table.draw();
+                    },
+                    error:function(data){
+                        console.log('Error:',data);
+                        $("#saveBtn").val("Save Changes");
+                    }
+
+                });
+
+
+                // alert("add button is clicked");
+                // $('#ajaxModal').modal('hide');
+            });
+        });
     </script>
     
 </body>

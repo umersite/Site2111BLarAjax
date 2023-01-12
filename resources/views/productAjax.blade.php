@@ -32,6 +32,7 @@
                     <th>No</th>
                     <th>Name</th>
                     <th>Details</th>
+                    <th>Action</th>
                     <!-- <th>Action</th> -->
                 </tr>
             </thead>
@@ -86,7 +87,8 @@
                 columns:[
                     {data: 'DT_RowIndex', name:'DT_RowIndex'},
                     {data:'name',name:'name'},
-                    {data:'detail',name:'detail'}                    
+                    {data:'detail',name:'detail'},
+                    {data:'action' , name:'action', orderable:false, searchable:false }                   
                 ] 
             });
             $('#CreateNewProduct').click(function(){
@@ -101,7 +103,7 @@
             /// add button code
             $("#saveBtn").click(function(e){
                 e.preventDefault();
-                $(this).html('Sending......');
+               //$(this).html('Sending......');
 
                 $.ajax({
                     data:$('#productForm').serialize(),
@@ -126,7 +128,43 @@
 
                 // alert("add button is clicked");
                 // $('#ajaxModal').modal('hide');
+              
             });
+            $('body').on('click','.editProduct',function(){
+                  // console.log("edit clicked");
+                   var product_id = $(this).data('id');
+                   //console.log('info',product_id);
+                   console.log('url',"{{ route('products.index')}}"+'/'+product_id+'/store');
+
+                   $.get("{{ route('products.index') }}"+'/'+product_id+'/edit',function(data){
+                    console.log('data is',data.name);
+                    $("#modelHeader").html("Edit Product");
+                    $("#saveBtn").val("Edit-Product");
+                    $('#ajaxModal').modal('show');
+                    $('#product_id').val(data.id);
+                    $('#name').val(data.name);
+                    $('#detail').val(data.detail);
+                   });
+
+                });
+             $('body').on('click','.deleteProduct',function(){
+                //alert("delete button clicked "+$(this).data('id'));
+                if (confirm("Are your sure?")) {
+                    var product_id = $(this).data('id');
+                    
+                    $.ajax({
+                        type:"DELETE",
+                        url: "{{ route('products.store')}}"+"/"+product_id,
+                        success:function(data){
+                            table.draw();
+                        },
+                        error: function(data){
+                            console.log('Error',data);
+                        }
+                    });
+                }
+
+             });   
         });
     </script>
     

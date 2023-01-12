@@ -20,7 +20,13 @@ class ProductAjaxController extends Controller
         if ($request->ajax()) {
            $data = Product::latest()->get();      
           return DataTables::of($data)
-          ->addIndexColumn()         
+          ->addIndexColumn()   
+          ->addColumn('action',function($row){
+            $btn= '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit"  class="edit btn btn-primary btn-sm editProduct">Edit</a>';
+            $btn=$btn.'&nbsp;' .'<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete"  class="delete btn btn-danger btn-sm deleteProduct">Delete</a>'; 
+            return $btn;
+          })  
+          ->rawColumns(['action'])    
           ->make(true);   
         }
         //return $data;
@@ -70,7 +76,8 @@ class ProductAjaxController extends Controller
      */
     public function edit($id)
     {
-        //
+       $product = Product::find($id);
+       return response()->json($product);
     }
 
     /**
@@ -93,6 +100,8 @@ class ProductAjaxController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Product::find($id)->delete();
+
+        return response()->json(['success'=>'Product is deleted successfully']);
     }
 }
